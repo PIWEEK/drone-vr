@@ -1,3 +1,4 @@
+const express = require('express');
 const dgram = require('dgram');
 const path = require('path');
 const WebSocket = require('ws');
@@ -5,6 +6,8 @@ const fs = require('fs');
 const PORT = 8889;
 const HOST = '192.168.10.1';
 const drone = dgram.createSocket('udp4');
+const app = express();
+
 drone.bind(PORT);
 
 const droneState = dgram.createSocket('udp4');
@@ -42,7 +45,7 @@ function droneRun(command) {
 }
 
 drone.on('message', (message) => {
-  console.log(`drone : ${message}`);
+  // console.log(`drone : ${message}`);
 
   if (String(message) === 'ok') {
     currentPromiseResolver();
@@ -53,7 +56,7 @@ droneState.on('message', (message) => {
   // console.log(`drone state : ${message}`);
 });
 
-let x = false;
+/* let x = false;
 droneStream.on('message', (message) => {
   console.log(`drone stream : ${message}`);
 
@@ -64,7 +67,7 @@ droneStream.on('message', (message) => {
       console.log('It\'s saved!');
     });
   }
-});
+}); */
 
 async function init() {
   // init flight test
@@ -91,39 +94,92 @@ setTimeout(() => {
   droneRun('land');
 }, 30000);
 
-// init2();
-
-
-const WS_PORT = 3001;
 const HTTP_PORT = 3000;
-const connectedClients = [];
-const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
 
-const express = require('express');
-const app = express();
+function videoByImage() {
+  app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
 
+  const WS_PORT = 3001;
+  const connectedClients = [];
+  const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
 
-wsServer.on('connection', (ws, req) => {
-  console.log('Connected');
-  // add new connected client
-  connectedClients.push(ws);
-  // listen for messages from the streamer, the clients will not send anything so we don't need to filter
+  wsServer.on('connection', (ws, req) => {
+    console.log('Connected');
+    // add new connected client
+    connectedClients.push(ws);
+    // listen for messages from the streamer, the clients will not send anything so we don't need to filter
 
-  vlcStream.on('message', (message) => {
-    console.log(`video stream : ${message}`);
-      // send the base64 encoded frame to each connected ws
-    connectedClients.forEach((ws, i) => {
-      if (ws.readyState === ws.OPEN) { // check if it is still connected
-          ws.send(message); // send
-      } else { // if it's not connected remove from the array of connected ws
-          connectedClients.splice(i, 1);
-      }
+    vlcStream.on('message', (message) => {
+      console.log(`video stream : ${message}`);
+        // send the base64 encoded frame to each connected ws
+      connectedClients.forEach((ws, i) => {
+        if (ws.readyState === ws.OPEN) { // check if it is still connected
+            ws.send(message); // send
+        } else { // if it's not connected remove from the array of connected ws
+            connectedClients.splice(i, 1);
+        }
+      });
     });
   });
-});
+}
+
+function videoByVideo() {
+  init2();
+  let lastFrame = '';
+
+
+  // var data = require('fs').readFileSync('img.png');
+
+  const Readable = require('stream').Readable;
+  const s = new Readable({
+    read(size) {
+      console.log('lastFrame', lastFrame);
+        s.push(lastFrame);
+      // if (lastFrame) {
+        console.log('push');
+        // s.push(lastFrame);
+        // lastFrame = null;
+      //}
+    }
+  });
+
+  app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
+
+  app.get('/video', function(req, res) {
+    const head = {
+      'Content-Type': 'video/mp4',
+    }
+
+    res.writeHead(200, head)
+    s.pipe(res)
+
+    // vlcStream
+    droneStream.on('message', (message) => {
+      console.log(`video stream : ${message.length}`);
+      // lastFrame = message;
+
+      if (message.length !== 1460) {
+
+      }
+    });
+
+    /*
+    const stat = fs.statSync('test.mp4')
+    const fileSize = stat.size
+
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    }
+    res.writeHead(200, head)
+    fs.createReadStream('test.mp4').pipe(res);
+    */
+  });
+}
 
 app.use(express.static('public'));
-app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
+
+videoByVideo();
 
 app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
 
