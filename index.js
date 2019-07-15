@@ -1,4 +1,5 @@
 const express = require('express');
+const ffi = require('ffi');
 const dgram = require('dgram');
 const path = require('path');
 const WebSocket = require('ws');
@@ -133,17 +134,23 @@ function videoByVideo() {
   const Readable = require('stream').Readable;
   const s = new Readable({
     read(size) {
-      console.log('lastFrame', lastFrame);
-        s.push(lastFrame);
+      s.push(lastFrame);
+
+      // console.log('lastFrame', lastFrame);
+        // s.push(lastFrame);
       // if (lastFrame) {
-        console.log('push');
+      // console.log('push');
         // s.push(lastFrame);
         // lastFrame = null;
       //}
+
+      return true;
     }
   });
 
   app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
+
+  let count = 0;
 
   app.get('/video', function(req, res) {
     const head = {
@@ -154,13 +161,27 @@ function videoByVideo() {
     s.pipe(res)
 
     // vlcStream
+    let image = '';
     droneStream.on('message', (message) => {
       console.log(`video stream : ${message.length}`);
       // lastFrame = message;
 
-      if (message.length !== 1460) {
+      image += message;
 
+      if (message.length !== 1460) {
+        lastFrame = message;
+        count++;
+
+        ffi.Library(path.resolve(__dirname, './video.html'), {
+          'ceil': [ 'double', [ 'double' ] ]
+        });
+
+/*         console.log(path.resolve(__dirname, 'images/',  count + 'image.h264'));
+        fs.writeFile(path.resolve(__dirname, 'images/',  count + 'image.h264'), image, () => {}); */
+        image= '';
       }
+
+      // ffmpeg -f h264 -i image.h264
     });
 
     /*
