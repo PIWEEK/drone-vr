@@ -1,0 +1,23 @@
+{
+  "name": "drone-vr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PIWEEK/drone-vr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PIWEEK/drone-vr/issues"
+  },
+  "homepage": "https://github.com/PIWEEK/drone-vr#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ws": "^7.1.0"
+  }
+}

@@ -1,4 +1,6 @@
 const dgram = require('dgram');
+const path = require('path');
+const WebSocket = require('ws');
 const fs = require('fs');
 const PORT = 8889;
 const HOST = '192.168.10.1';
@@ -10,6 +12,10 @@ droneState.bind(8890);
 
 const droneStream = dgram.createSocket('udp4');
 droneStream.bind(11111);
+
+
+const vlcStream = dgram.createSocket('udp4');
+vlcStream.bind(1234);
 
 let currentPromiseResolver = null;
 
@@ -47,16 +53,20 @@ droneState.on('message', (message) => {
   // console.log(`drone state : ${message}`);
 });
 
+let x = false;
 droneStream.on('message', (message) => {
   console.log(`drone stream : ${message}`);
 
-  fs.writeFile('image.png', chunk, function (err) {
-    if (err) throw err;
-    console.log('It\'s saved!');
-});
+  if (!x) {
+    x = true;
+    fs.writeFile('image.png', message, function (err) {
+      if (err) throw err;
+      console.log('It\'s saved!');
+    });
+  }
 });
 
-/* async function init() {
+async function init() {
   // init flight test
   await droneRun('command');
   droneRun('battery?');
@@ -69,9 +79,9 @@ droneStream.on('message', (message) => {
   await droneRun('down 50');
   await droneRun('back 100');
   await droneRun('land');
-} */
+}
 
-async function init() {
+async function init2() {
   await droneRun('command');
   await droneRun('streamon');
 }
@@ -79,11 +89,76 @@ async function init() {
 setTimeout(() => {
   console.log('force end');
   droneRun('land');
-}, 20000);
+}, 30000);
 
-setTimeout(() => {
-  console.log('force end');
-  droneRun('land');
-}, 25000);
+// init2();
 
-init();
+
+const WS_PORT = 3001;
+const HTTP_PORT = 3000;
+const connectedClients = [];
+const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
+
+const express = require('express');
+const app = express();
+
+
+wsServer.on('connection', (ws, req) => {
+  console.log('Connected');
+  // add new connected client
+  connectedClients.push(ws);
+  // listen for messages from the streamer, the clients will not send anything so we don't need to filter
+
+  vlcStream.on('message', (message) => {
+    console.log(`video stream : ${message}`);
+      // send the base64 encoded frame to each connected ws
+    connectedClients.forEach((ws, i) => {
+      if (ws.readyState === ws.OPEN) { // check if it is still connected
+          ws.send(message); // send
+      } else { // if it's not connected remove from the array of connected ws
+          connectedClients.splice(i, 1);
+      }
+    });
+  });
+});
+
+app.use(express.static('public'));
+app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
+
+app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
+
+
+/*
+app.get('/video', function(req, res) {
+  const path = 'assets/sample.mp4';
+  const stat = fs.statSync(path);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1]
+      ? parseInt(parts[1], 10)
+      : fileSize-1;
+
+    const chunksize = (end-start) + 1;
+    const file = fs.createReadStream(path, {start, end});
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(path).pipe(res);
+  }
+});
+*/
