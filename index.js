@@ -1,5 +1,4 @@
 const express = require('express');
-const ffi = require('ffi');
 const dgram = require('dgram');
 const path = require('path');
 const WebSocket = require('ws');
@@ -152,6 +151,10 @@ function videoByVideo() {
 
   let count = 0;
 
+  const broadway = require('broadway-player');
+
+  var decoder = new broadway.Decoder({});
+
   app.get('/video', function(req, res) {
     const head = {
       'Content-Type': 'video/mp4',
@@ -164,17 +167,18 @@ function videoByVideo() {
     let image = '';
     droneStream.on('message', (message) => {
       console.log(`video stream : ${message.length}`);
-      // lastFrame = message;
-
       image += message;
 
       if (message.length !== 1460) {
-        lastFrame = message;
-        count++;
+        decoder.onPictureDecoded = (result) => {
+          lastFrame = result;
+        };
 
-        ffi.Library(path.resolve(__dirname, './video.html'), {
-          'ceil': [ 'double', [ 'double' ] ]
-        });
+        decoder.decode(image);
+
+
+        // lastFrame = message;
+        count++;
 
 /*         console.log(path.resolve(__dirname, 'images/',  count + 'image.h264'));
         fs.writeFile(path.resolve(__dirname, 'images/',  count + 'image.h264'), image, () => {}); */
