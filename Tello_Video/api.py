@@ -9,7 +9,6 @@ c = zerorpc.Client()
 c.connect("tcp://127.0.0.1:4242")
 
 def videoLoop(drone):
-  count = 0
   while True:
     frame = drone.read()
     if frame is None or frame.size == 0:
@@ -19,9 +18,7 @@ def videoLoop(drone):
 
     image = Image.fromarray(frame)
     image.save(output, format='JPEG')
-    c.hello(output.getvalue())
-    count += 1
-    #image.save('img/back/' + str(count) + '-back.jpg', format='JPEG')"
+    c.sendFrame(output.getvalue())
 
 def main():
     drone = tello.Tello('', 9999)

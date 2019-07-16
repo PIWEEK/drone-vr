@@ -2,24 +2,19 @@ const express = require('express');
 const dgram = require('dgram');
 const path = require('path');
 const WebSocket = require('ws');
-const fs = require('fs');
 const PORT = 8889;
 const HOST = '192.168.10.1';
 const drone = dgram.createSocket('udp4');
 const app = express();
 const spawn = require('child_process').spawn;
+const WS_PORT = 3001;
+const HTTP_PORT = 3000;
 
 drone.bind(PORT);
 
-const droneState = dgram.createSocket('udp4');
-droneState.bind(8890);
-
 function spawnPython(exitCallback) {
-  var args = ['Tello_Video/api.py'];
-
-	var python = spawn('python', args);
-
-	console.log('Spawning python ' + args.join(' '));
+  const args = ['Tello_Video/api.py'];
+	const python = spawn('python', args);
 
 	python.on('exit', exitCallback);
 
@@ -46,7 +41,6 @@ function handleError(err)  {
 }
 
 function droneRun(command) {
-  console.log('command', command);
   drone.send(command, 0, command.length, PORT, HOST, handleError);
 
   return new Promise((resolve) => {
@@ -55,27 +49,25 @@ function droneRun(command) {
 }
 
 drone.on('message', (message) => {
-  console.log(`drone : ${message}`);
+  if (String(message) !== 'ok') {
+    console.log(`drone : ${message}`);
+  }
 
   if (String(message) === 'ok') {
     currentPromiseResolver();
   }
 });
 
-droneState.on('message', (message) => {
-  // console.log(`drone state : ${message}`);
-});
-
-var zerorpc = require("zerorpc");
+const zerorpc = require('zerorpc');
 
 async function flight () {
   await droneRun('takeoff');
-  await droneRun('forward 100');
+  await droneRun('forward 300');
   await droneRun('up 50');
   await sleep(2000);
   await droneRun('flip f');
   await droneRun('down 50');
-  await droneRun('back 100');
+  await droneRun('back 300');
   await droneRun('land');
 }
 
@@ -84,26 +76,17 @@ async function init() {
   droneRun('battery?');
   await droneRun('streamon');
 
-  const frames = spawnPython(() => {
-    console.log('fin')
+  spawnPython(() => {
+    console.log('closing python spawn')
   });
 }
 
-setTimeout(() => {
-  console.log('force end');
-  droneRun('land');
-}, 30000);
-
-const HTTP_PORT = 3000;
-
 async function videoByImage() {
-  const WS_PORT = 3001;
   const connectedClients = [];
   const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
 
   const server = new zerorpc.Server({
-    hello: function(name, reply) {
-      console.log(name);
+    sendFrame: function(name, reply) {
       connectedClients.forEach((ws, i) => {
         if (ws.readyState === ws.OPEN) { // check if it is still connected
             ws.send('data:image/jpg;base64,' + name.toString('base64')); // send
@@ -112,19 +95,18 @@ async function videoByImage() {
         }
       });
 
-      reply(null, "Hello, " + name);
+      reply(null);
     }
   });
 
-  server.bind("tcp://0.0.0.0:4242");
+  server.bind('tcp://0.0.0.0:4242');
 
   await init();
 
   app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
   app.get('/video', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
 
-  wsServer.on('connection', (ws, req) => {
-    console.log('Connected');
+  wsServer.on('connection', (ws) => {
     connectedClients.push(ws);
   });
 
@@ -132,5 +114,11 @@ async function videoByImage() {
 }
 
 videoByImage();
+
 app.use(express.static('public'));
 app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
+
+setTimeout(() => {
+  console.log('force end');
+  droneRun('land');
+}, 30000);
