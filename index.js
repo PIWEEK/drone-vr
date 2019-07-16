@@ -7,6 +7,15 @@ const PORT = 8889;
 const HOST = '192.168.10.1';
 const drone = dgram.createSocket('udp4');
 const app = express();
+const frameX = 960;
+const frameY = 720;
+const spawn = require('child_process').spawn;
+const frameSize = frameX * frameY * 3;
+const Decoder = require('./decoder');
+const ffmpeg = require('ffmpeg-binaries');
+
+console.log(Decoder);
+
 
 drone.bind(PORT);
 
@@ -15,10 +24,33 @@ droneState.bind(8890);
 
 const droneStream = dgram.createSocket('udp4');
 droneStream.bind(11111);
-
-
+/*
 const vlcStream = dgram.createSocket('udp4');
-vlcStream.bind(1234);
+vlcStream.bind(1234); */
+
+/*
+ffmpeg := exec.Command('ffmpeg', '-hwaccel', 'auto', '-hwaccel_device', 'opencl', '-i', 'pipe:0',
+		'-pix_fmt', 'bgr24', '-s', strconv.Itoa(frameX)+'x'+strconv.Itoa(frameY), '-f', 'rawvideo', 'pipe:1')
+	ffmpegIn, _ := ffmpeg.StdinPipe()
+ffmpegOut, _ := ffmpeg.StdoutPipe()
+*/
+
+function spawnFfmpeg(exitCallback) {
+  var args = ['-i', 'pipe:0',
+  '-pix_fmt', 'bgr24', '-s', frameX +'x'+ frameY, '-f', 'rawvideo', 'pipe:1'];
+
+	var ffmpeg = spawn('ffmpeg', args);
+
+	console.log('Spawning ffmpeg ' + args.join(' '));
+
+	ffmpeg.on('exit', exitCallback);
+
+	ffmpeg.stderr.on('data', function (data) {
+    console.log('grep stderr: ' + data);
+  });
+
+  return ffmpeg;
+}
 
 let currentPromiseResolver = null;
 
@@ -133,7 +165,7 @@ function videoByVideo() {
   const Readable = require('stream').Readable;
   const s = new Readable({
     read(size) {
-      s.push(lastFrame);
+      // s.push(lastFrame);
 
       // console.log('lastFrame', lastFrame);
         // s.push(lastFrame);
@@ -151,10 +183,6 @@ function videoByVideo() {
 
   let count = 0;
 
-  const broadway = require('broadway-player');
-
-  var decoder = new broadway.Decoder({});
-
   app.get('/video', function(req, res) {
     const head = {
       'Content-Type': 'video/mp4',
@@ -163,9 +191,10 @@ function videoByVideo() {
     res.writeHead(200, head)
     s.pipe(res)
 
-    // vlcStream
-    let image = '';
-    droneStream.on('message', (message) => {
+
+/*
+      let image = '';
+      droneStream.on('message', (message) => {
       console.log(`video stream : ${message.length}`);
       image += message;
 
@@ -179,26 +208,83 @@ function videoByVideo() {
 
         // lastFrame = message;
         count++;
-
-/*         console.log(path.resolve(__dirname, 'images/',  count + 'image.h264'));
-        fs.writeFile(path.resolve(__dirname, 'images/',  count + 'image.h264'), image, () => {}); */
         image= '';
       }
 
       // ffmpeg -f h264 -i image.h264
-    });
+    }); */
 
     /*
-    const stat = fs.statSync('test.mp4')
-    const fileSize = stat.size
+    const ffmpeg = spawnFfmpeg(
+      (code) => {
+      	console.log('child process exited with code ' + code);
+      	res.end();
+      });
 
-    const head = {
-      'Content-Length': fileSize,
-      'Content-Type': 'video/mp4',
-    }
-    res.writeHead(200, head)
-    fs.createReadStream('test.mp4').pipe(res);
-    */
+    const headers = {
+      'h264_baseline': Buffer([0, 0, 0, 1]) // h264 NAL unit
+    };
+    const h264chunks = []
+
+    let image = '';
+    ffmpeg.stdout.on('data', (data) => {
+      // console.log('---------------data---------------');
+      // console.log(data);
+
+      image += data;
+      if (data.length !== 1460) {
+        s.push(data);
+        image = '';
+      }
+   var idx = data.indexOf(headers['h264_baseline'])
+      if (idx > -1 && h264chunks.length > 0) {
+        h264chunks.push(data.slice(0, idx))
+        h264_player.decode(Uint8Array.from(Buffer.concat(h264chunks)))
+        h264chunks = []
+        h264chunks.push(data.slice(idx))
+      } else {
+        h264chunks.push(data)
+      }
+    })
+
+    droneStream.on('message', (message) => {
+      // console.log(`video stream : ${message.length}`);
+      ffmpeg.stdin.write(message);
+      // ffmpeg -f h264 -i image.h264
+    });*/
+
+    const h264encoder_spawn = {
+      'command': 'ffmpeg',
+      'args': [ '-fflags', 'nobuffer', '-f', 'h264', '-i', '-', '-r', '30', '-c:v', 'libx264', '-b:v', '2M', '-profile', 'baseline', '-preset', 'ultrafast', '-tune', 'zerolatency', '-vsync', '0', '-async', '0', '-bsf:v', 'h264_mp4toannexb', '-x264-params', 'keyint=5:scenecut=0', '-an', '-f', 'h264', '-analyzeduration', '10000', '-probesize', '32', '-']
+    };
+
+    const headers = {
+      'h264_baseline': Buffer([0, 0, 0, 1]) // h264 NAL unit
+    };
+
+    let h264chunks = []
+    const h264encoder = spawn(h264encoder_spawn.command, h264encoder_spawn.args)
+
+    const parseMsg = function (data) {
+      h264encoder.stdin.write(data)
+    };
+
+    h264encoder.stdout.on('data', function (data) {
+      console.log(data);
+      var idx = data.indexOf(headers['h264_baseline'])
+      if (idx > -1 && h264chunks.length > 0) {
+        h264chunks.push(data.slice(0, idx))
+        console.log(Decoder(Uint8Array.from(Buffer.concat(h264chunks))));
+        h264chunks = []
+        h264chunks.push(data.slice(idx))
+      } else {
+        h264chunks.push(data)
+      }
+    });
+
+    droneStream.on('message', (message) => {
+      parseMsg(message);
+    });
   });
 }
 
@@ -217,7 +303,7 @@ app.get('/video', function(req, res) {
   const range = req.headers.range;
 
   if (range) {
-    const parts = range.replace(/bytes=/, "").split("-");
+    const parts = range.replace(/bytes=/, '').split('-');
     const start = parseInt(parts[0], 10);
     const end = parts[1]
       ? parseInt(parts[1], 10)
