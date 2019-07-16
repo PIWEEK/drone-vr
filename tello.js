@@ -89,7 +89,7 @@ async function videoByImage() {
     sendFrame: function(name, reply) {
       connectedClients.forEach((ws, i) => {
         if (ws.readyState === ws.OPEN) { // check if it is still connected
-            ws.send('data:image/jpg;base64,' + name.toString('base64')); // send
+          ws.send('data:image/jpg;base64,' + name.toString('base64')); // send
         } else { // if it's not connected remove from the array of connected ws
             connectedClients.splice(i, 1);
         }
@@ -110,7 +110,7 @@ async function videoByImage() {
     connectedClients.push(ws);
   });
 
-  flight();
+  // flight();
 }
 
 videoByImage();
