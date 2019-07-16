@@ -66,35 +66,7 @@ droneState.on('message', (message) => {
   // console.log(`drone state : ${message}`);
 });
 
-/* let x = false;
-droneStream.on('message', (message) => {
-  console.log(`drone stream : ${message}`);
-
-  if (!x) {
-    x = true;
-    fs.writeFile('image.png', message, function (err) {
-      if (err) throw err;
-      console.log('It\'s saved!');
-    });
-  }
-}); */
-
 var zerorpc = require("zerorpc");
-var countx = 0;
-
-var server = new zerorpc.Server({
-    hello: function(name, reply) {
-
-      fs.writeFile('img/'+countx+'image.jpg', name, function (err) {
-        if (err) throw err;
-        console.log('It\'s saved!');
-      });
-      countx++;
-      reply(null, "Hello, " + name);
-    }
-});
-
-server.bind("tcp://0.0.0.0:4242");
 
 async function init() {
   await droneRun('command');
@@ -120,35 +92,39 @@ setTimeout(() => {
   droneRun('land');
 }, 30000);
 
-const HTTP_PORT = 4000;
+const HTTP_PORT = 3000;
 
 async function videoByImage() {
-  await init();
-
-  app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
-/*
   const WS_PORT = 3001;
   const connectedClients = [];
   const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
 
-  wsServer.on('connection', (ws, req) => {
-    console.log('Connected');
-    // add new connected client
-    connectedClients.push(ws);
-    // listen for messages from the streamer, the clients will not send anything so we don't need to filter
-
-    vlcStream.on('message', (message) => {
-      console.log(`video stream : ${message}`);
-        // send the base64 encoded frame to each connected ws
+  const server = new zerorpc.Server({
+    hello: function(name, reply) {
+      console.log(name);
       connectedClients.forEach((ws, i) => {
         if (ws.readyState === ws.OPEN) { // check if it is still connected
-            ws.send(message); // send
+            ws.send('data:image/jpg;base64,' + name.toString('base64')); // send
         } else { // if it's not connected remove from the array of connected ws
             connectedClients.splice(i, 1);
         }
       });
-    });
-  }); */
+
+      reply(null, "Hello, " + name);
+    }
+  });
+
+  server.bind("tcp://0.0.0.0:4242");
+
+  await init();
+
+  app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
+  app.get('/video', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
+
+  wsServer.on('connection', (ws, req) => {
+    console.log('Connected');
+    connectedClients.push(ws);
+  });
 }
 
 videoByImage();

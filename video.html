@@ -3,14 +3,19 @@
     <title>Client</title>
 </head>
 <body>
-    <video id="videoPlayer" autoplay controls>  <source src="http://localhost:3000/video" type="video/mp4"></video>
+    <img src="">
     <script>
-/*       const VP = document.getElementById('videoPlayer') // player
-      const VPToggle = document.getElementById('toggleButton') // button
-      VPToggle.addEventListener('click', function() {
-        if (VP.paused) VP.play()
-        else VP.pause()
-      }); */
+        // get img dom element
+        const img = document.querySelector('img');
+
+        const WS_URL = 'ws://localhost:3001';
+        const ws = new WebSocket(WS_URL);
+        ws.onopen = () => console.log(`Connected to ${WS_URL}`);
+        ws.onmessage = message => {
+          console.log(message);
+            // set the base64 string to the src tag of the image
+          img.src = message.data;
+        }
     </script>
 </body>
 </html>
