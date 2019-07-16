@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo --live --verbose --port 3000 --open",
+    "deploy": "ghpages",
+    "ghpages": "ghpages"
   },
   "repository": {
     "type": "git",
@@ -17,10 +20,21 @@
   },
   "homepage": "https://github.com/PIWEEK/drone-vr#readme",
   "dependencies": {
+    "ar-drone": "git://github.com/felixge/node-ar-drone.git",
     "broadway-player": "^0.1.1",
     "express": "^4.17.1",
     "ffmpeg-binaries": "^4.0.0",
     "fluent-ffmpeg": "^2.1.2",
-    "ws": "^7.1.0"
-  }
+    "ws": "^7.1.0",
+    "budo": "^7.0.0",
+    "ghpages": "0.0.3"
+  },
+  "keywords": [
+    "aframe",
+    "aframe-example",
+    "aframe-boilerplate",
+    "aframe-scene",
+    "webvr",
+    "vr"
+  ]
 }

@@ -17,8 +17,11 @@ function sleep(ms){
   });
 }
 
-const vlcStream = dgram.createSocket('udp4');
-vlcStream.bind(1234);
+var arDrone = require('ar-drone');
+var client  = arDrone.createClient();
+// client.createRepl();
+
+var videoStream = client.getPngStream();
 
 const HTTP_PORT = 3000;
 
@@ -35,7 +38,7 @@ function videoByImage() {
     connectedClients.push(ws);
     // listen for messages from the streamer, the clients will not send anything so we don't need to filter
 
-    vlcStream.on('message', (message) => {
+    videoStream.on('data', (message) => {
       console.log(`video stream : ${message}`);
         // send the base64 encoded frame to each connected ws
       connectedClients.forEach((ws, i) => {
