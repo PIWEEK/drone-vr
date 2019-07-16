@@ -79,24 +79,8 @@ droneStream.on('message', (message) => {
   }
 }); */
 
-var zerorpc = require("zerorpc");
-var countx = 0;
-
-var server = new zerorpc.Server({
-    hello: function(name, reply) {
-
-      fs.writeFile('img/'+countx+'image.jpg', name, function (err) {
-        if (err) throw err;
-        console.log('It\'s saved!');
-      });
-      countx++;
-      reply(null, "Hello, " + name);
-    }
-});
-
-server.bind("tcp://0.0.0.0:4242");
-
 async function init() {
+  // init flight test
   await droneRun('command');
   droneRun('battery?');
   await droneRun('streamon');
@@ -104,6 +88,42 @@ async function init() {
   const frames = spawnPython(() => {
     console.log('fin')
   });
+
+  var count = 0;
+  var bufferImages = [];
+  const separator = '-----fin-----';
+
+  frames.stdout.on('data', (x) => {
+/*     fs.writeFile('img/front/' + count + '-front.jpg', x, () => {});
+    count++; */
+
+    bufferImages.push(message);
+
+    if (bufferImages.indexOf(separator) !== -1) {
+      count++;
+
+      const images = bufferImages.split(separator);
+
+      if (images.length > 1) {
+        fs.writeFile('img/front/' + count + '-front.jpg', images.shift(), () => {});
+        bufferImages = images.join(separator);
+      }
+
+    }
+/*     if (count === 2) {
+      console.log('image 1')
+      console.log(list[0].slice(0, 10));
+      console.log('image 2')
+      console.log(list[1].slice(0, 10));
+      setTimeout(() => {
+
+        this['sdfdsfd']();
+      }, 1000);
+    } */
+  });
+
+
+
 
 /*   await droneRun('takeoff');
   await droneRun('forward 100');
@@ -120,7 +140,7 @@ setTimeout(() => {
   droneRun('land');
 }, 30000);
 
-const HTTP_PORT = 4000;
+const HTTP_PORT = 3000;
 
 async function videoByImage() {
   await init();

@@ -22,12 +22,14 @@
   "dependencies": {
     "ar-drone": "git://github.com/felixge/node-ar-drone.git",
     "broadway-player": "^0.1.1",
+    "budo": "^7.0.0",
     "express": "^4.17.1",
     "ffmpeg-binaries": "^4.0.0",
     "fluent-ffmpeg": "^2.1.2",
+    "ghpages": "0.0.3",
     "ws": "^7.1.0",
-    "budo": "^7.0.0",
-    "ghpages": "0.0.3"
+    "zeromq": "^5.1.0",
+    "zerorpc": "^0.9.8"
   },
   "keywords": [
     "aframe",
