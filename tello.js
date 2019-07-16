@@ -68,6 +68,17 @@ droneState.on('message', (message) => {
 
 var zerorpc = require("zerorpc");
 
+async function flight () {
+  await droneRun('takeoff');
+  await droneRun('forward 100');
+  await droneRun('up 50');
+  await sleep(2000);
+  await droneRun('flip f');
+  await droneRun('down 50');
+  await droneRun('back 100');
+  await droneRun('land');
+}
+
 async function init() {
   await droneRun('command');
   droneRun('battery?');
@@ -76,15 +87,6 @@ async function init() {
   const frames = spawnPython(() => {
     console.log('fin')
   });
-
-/*   await droneRun('takeoff');
-  await droneRun('forward 100');
-  await droneRun('up 50');
-  await sleep(2000);
-  await droneRun('flip f');
-  await droneRun('down 50');
-  await droneRun('back 100');
-  await droneRun('land'); */
 }
 
 setTimeout(() => {
@@ -125,6 +127,8 @@ async function videoByImage() {
     console.log('Connected');
     connectedClients.push(ws);
   });
+
+  flight();
 }
 
 videoByImage();

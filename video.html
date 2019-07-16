@@ -4,9 +4,10 @@
 </head>
 <body>
     <img src="">
+    <canvas class="main"></canvas>
     <script>
         // get img dom element
-        const img = document.querySelector('img');
+/*         const img = document.querySelector('img');
 
         const WS_URL = 'ws://localhost:3001';
         const ws = new WebSocket(WS_URL);
@@ -15,6 +16,25 @@
           console.log(message);
             // set the base64 string to the src tag of the image
           img.src = message.data;
+        } */
+
+        const canvas = document.querySelector('.main');
+        canvas.width  = 960;
+        canvas.height = 720;
+
+        const ctx = canvas.getContext('2d');
+
+        const WS_URL = 'ws://localhost:3001';
+        const ws = new WebSocket(WS_URL);
+
+        ws.onopen = () => console.log(`Connected to ${WS_URL}`);
+        ws.onmessage = (message) => {
+          var image = new Image();
+
+          image.onload = function() {
+            ctx.drawImage(image, 0, 0);
+          };
+          image.src = message.data;
         }
     </script>
 </body>
