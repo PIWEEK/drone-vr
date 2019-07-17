@@ -27,7 +27,7 @@ AFRAME.registerComponent('vr-controls', {
     });
 
     el.addEventListener('axismove', function (evt) {
-      FlightContol.axismove(event.axis);
+      FlightContol.axismove(evt);
     });
   }
 });
