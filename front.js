@@ -16,6 +16,7 @@ var el;
 const mainLoop = function() {
   if (lastFrame) {
     el.setAttribute('material', 'src', lastFrame);
+    el.setAttribute('material', '', );
     lastFrame = null;
   }
 
