@@ -19,15 +19,15 @@ AFRAME.registerComponent('vr-controls', {
   init: function () {
     var el = this.el;
     el.addEventListener('xbuttondown', function (evt) {
-      FlightContol.x();
+      FlightControl.x();
     });
 
     el.addEventListener('ybuttondown', function (evt) {
-      FlightContol.y();
+      FlightControl.y();
     });
 
     el.addEventListener('axismove', function (evt) {
-      FlightContol.axismove(evt);
+      FlightControl.axismove(evt);
     });
   }
 });
