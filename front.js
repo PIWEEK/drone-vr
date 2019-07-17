@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el = document.querySelector('#entity1');
   leftHand = document.querySelector('#left-control');
   rightHand = document.querySelector('#right-control');
-  const width = 8; // meters
+  const width = 1; // meters
   const height = width * 760 / 960;
 
   el.setAttribute('width', width);
