@@ -111,6 +111,10 @@ async function videoByImage() {
     connectedClients.push(ws);
   });
 
+  ws.on('message', (data) => {
+    droneRun(data);
+  });
+
   // flight();
 }
 

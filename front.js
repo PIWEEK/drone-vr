@@ -12,6 +12,21 @@ ws.onmessage = (message) => {
 };
 
 var el;
+var leftHand;
+var rightHand;
+
+AFRAME.registerComponent('vr-controls', {
+  init: function () {
+    var el = this.el;
+    el.addEventListener('xbuttondown', function (evt) {
+      FlightContol.x();
+    });
+
+    el.addEventListener('ybuttondown', function (evt) {
+      FlightContol.y();
+    });
+  }
+});
 
 const mainLoop = function() {
   if (lastFrame) {
@@ -20,16 +35,20 @@ const mainLoop = function() {
     lastFrame = null;
   }
 
+  //console.log(leftHand.getAttribute('position'));
+
   requestAnimationFrame(mainLoop);
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   el = document.querySelector('#entity1');
+  leftHand = document.querySelector('#left-control');
+  rightHand = document.querySelector('#right-control');
   const width = 8; // meters
   const height = width * 760 / 960;
 
   el.setAttribute('width', width);
   el.setAttribute('height', height);
-
+  console.log('aaaaaaaaaaaaaa')
   mainLoop();
 });

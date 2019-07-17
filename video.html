@@ -3,6 +3,7 @@
     <title>Client</title>
     <script src="aframe.js"></script>
     <!-- <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script> -->
+    <script src="flight-control.js"></script>
     <script src="front.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
   </head>
@@ -19,6 +20,9 @@
       <a-plane
         id="entity1"
         position="0 2 -2.5"></a-plane>
+
+      <a-entity id="left-control" vr-controls oculus-touch-controls="hand: left"></a-entity>
+      <a-entity id="right-control" vr-controls oculus-touch-controls="hand: right"></a-entity>
     </a-scene>
   SD</body>
 </html>
