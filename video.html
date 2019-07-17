@@ -1,7 +1,8 @@
 <html>
 <head>
     <title>Client</title>
-    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <script src="aframe.js"></script>
+    <!-- <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script> -->
     <script src="front.js"></script>
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
   </head>
@@ -9,10 +10,9 @@
     <a-scene>
       <a-entity environment="preset: starry; ground: canyon"></a-entity>
       <a-light color="#eee" position="0 1 1" decay="55"></a-light>
-     <!--  <a-plane id="entity1"
-        position="0 2 0"> -->
-
-      <a-plane id="entity1" position="0 2 -1" custom-material></a-plane>
+      <a-plane
+        id="entity1"
+        position="0 1.25 -2.75"></a-plane>
     </a-scene>
 </body>
 </html>

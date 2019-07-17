@@ -102,10 +102,10 @@ async function videoByImage() {
 
   server.bind('tcp://0.0.0.0:4242');
 
-  await init();
-
   app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
   app.get('/video', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
+
+  await init();
 
   wsServer.on('connection', (ws) => {
     connectedClients.push(ws);
