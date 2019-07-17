@@ -1,9 +1,9 @@
 function send(command) {
   console.log(command);
-  send(command):
+  send(command);
 }
 
-var FlightContol = {
+var FlightControl = {
   x: () => {
     send('takeoff');
   },
