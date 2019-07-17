@@ -28,8 +28,8 @@ AFRAME.registerComponent('custom-material', {
 var el;
 
 const mainLoop = function() {
-  if (lastFrame) {
-    el.setAttribute('material', 'src', lastFrame);
+  if (FRAME) {
+    el.setAttribute('material', 'src', FRAME);
 
     lastFrame = null;
   }
