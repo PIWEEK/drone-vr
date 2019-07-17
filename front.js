@@ -25,7 +25,7 @@ const mainLoop = function() {
 
 document.addEventListener('DOMContentLoaded', () => {
   el = document.querySelector('#entity1');
-  const width = 1; // meters
+  const width = 8; // meters
   const height = width * 760 / 960;
 
   el.setAttribute('width', width);

@@ -8,11 +8,17 @@
   </head>
   <body>
     <a-scene>
-      <a-entity environment="preset: starry; ground: canyon"></a-entity>
-      <a-light color="#eee" position="0 1 1" decay="55"></a-light>
+      <a-entity light="type: ambient; color: #fff"></a-entity>
+      <a-assets>
+        <a-asset-item id="tree" src="/model/scene.gltf"></a-asset-item>
+      </a-assets>
+      <!-- <a-entity obj-model="obj: #cockpit-obj; mtl: #cockpit-mtl" position="0 0 0" scale="0.001 0.001 0.001"></a-entity> -->
+      <a-entity gltf-model="#tree" rotation="0 180 0" position="0 1.5 0" scale="2 2 2"></a-entity>
+
+      <a-entity environment="preset: none; ground: canyon"></a-entity>
       <a-plane
         id="entity1"
-        position="0 1.25 -2.75"></a-plane>
+        position="0 2 -2.5"></a-plane>
     </a-scene>
-</body>
+  SD</body>
 </html>
