@@ -105,15 +105,17 @@ async function videoByImage() {
   app.get('/client', (req, res) => res.sendFile(path.resolve(__dirname, './index.html')));
   app.get('/video', (req, res) => res.sendFile(path.resolve(__dirname, './video.html')));
 
-  await init();
-
   wsServer.on('connection', (ws) => {
+    console.log('connection');
     connectedClients.push(ws);
+
+    ws.on('message', (data) => {
+      console.log('mensaje', data)
+      droneRun(data);
+    });
   });
 
-  ws.on('message', (data) => {
-    droneRun(data);
-  });
+  await init();
 
   // flight();
 }

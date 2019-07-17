@@ -25,6 +25,10 @@ AFRAME.registerComponent('vr-controls', {
     el.addEventListener('ybuttondown', function (evt) {
       FlightContol.y();
     });
+
+    el.addEventListener('axismove', function (evt) {
+      FlightContol.axismove(event.axis);
+    });
   }
 });
 
