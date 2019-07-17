@@ -1,6 +1,6 @@
 function send(command) {
   console.log(command);
-  send(command);
+  ws.send(command);
 }
 
 var FlightControl = {
