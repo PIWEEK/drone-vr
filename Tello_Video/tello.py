@@ -51,6 +51,9 @@ class Tello:
         else:
             return self.frame
 
+    def clear(self):
+        self.frame = None
+
     def video_freeze(self, is_freeze=True):
         """Pause video output -- set is_freeze to True"""
         self.is_freeze = is_freeze

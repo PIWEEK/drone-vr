@@ -15,6 +15,7 @@ def videoLoop(drone):
       continue
 
     output = io.BytesIO()
+    drone.clear()
 
     image = Image.fromarray(frame)
     image.save(output, format='JPEG')

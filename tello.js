@@ -84,6 +84,7 @@ async function init() {
 async function videoByImage() {
   const connectedClients = [];
   const wsServer = new WebSocket.Server({ port: WS_PORT }, () => console.log(`WS server is listening at ws://localhost:${WS_PORT}`));
+  var count = 0;
 
   const server = new zerorpc.Server({
     sendFrame: function(name, reply) {
@@ -115,7 +116,7 @@ async function videoByImage() {
 
 videoByImage();
 
-app.use(express.static('public'));
+app.use(express.static('.'));
 app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
 
 setTimeout(() => {
