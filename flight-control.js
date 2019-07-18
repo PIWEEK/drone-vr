@@ -1,6 +1,6 @@
 function send(command) {
   console.log(command);
-  ws.send(command);
+  //ws.send(command);
 }
 
 var FlightControl = {
@@ -10,14 +10,16 @@ var FlightControl = {
   y: () => {
     send('land');
   },
-  axismove: (event) => {
+  axismove: (left, right) => {
     const distance = 40;
-    const originalHorizontal = event.detail.axis[0];
-    const originalVertical = event.detail.axis[1];
+    const horizontalLeft = left[0];
+    const verticalLeft = left[1];
 
-    const horizontal = (originalHorizontal * 100) / 2;
-    const vertical = (originalVertical * 100) / 2;
-    const noMoveMargin = 0.5;
+    const horizontalRight = right[0];
+    const verticalRight = right[1];
+
+    send(`rc ${horizontalRight} ${verticalRight} ${verticalLeft} ${horizontalLeft}`);
+/*
 
     if (event.target.getAttribute('id') === 'left-control') {
       if (horizontal > noMoveMargin) {
@@ -30,9 +32,8 @@ var FlightControl = {
         send(`down ${distance}`);
       }
     } else {
-      send(`rc ${horizontal} ${vertical} 0 0`);
     }
-
+*/
    //  console.log(event.detail.axis);
 //     send('forward 1');
   }
