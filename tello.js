@@ -126,7 +126,7 @@ async function videoByImage() {
 
   // flight();
   // flight2();
-  flight3();
+  // flight3();
 }
 
 videoByImage();

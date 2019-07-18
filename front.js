@@ -87,8 +87,8 @@ AFRAME.registerComponent('vr-controls', {
 });
 
 const mainLoop = function() {
-  if (FRAME) {
-    el.setAttribute('material', 'src', FRAME);
+  if (lastFrame) {
+    el.setAttribute('material', 'src', lastFrame);
     el.setAttribute('material', '', );
     lastFrame = null;
   }
