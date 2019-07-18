@@ -141,7 +141,7 @@ async function videoByImage() {
 
     setInterval(() => {
       getStats(ws);
-    }, 3000);
+    }, 4000);
 
     ws.on('message', messageRecived);
   });

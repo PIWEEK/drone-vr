@@ -82,7 +82,6 @@ var altitude;
 var signal;
 
 function updateStats(stats) {
-  console.log(stats);
   battery.setAttribute('value', stats.battery);
   altitude.setAttribute('value', stats.tof);
   signal.setAttribute('value', stats.wifi);
