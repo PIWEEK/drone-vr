@@ -1,6 +1,8 @@
 function send(command) {
   console.log(command);
-  ws.send(command);
+  if (window['ws']) {
+    window['ws'].send(command);
+  }
 }
 
 var FlightControl = {
@@ -11,7 +13,6 @@ var FlightControl = {
     send('land');
   },
   axismove: (left, right) => {
-    const distance = 40;
     const horizontalLeft = left[0];
     const verticalLeft = left[1];
 
