@@ -85,6 +85,10 @@ AFRAME.registerComponent('vr-controls', {
       FlightControl.y();
     });
 
+    el.addEventListener('triggerdown', function (evt) {
+      FlightControl.photo();
+    });
+
     el.addEventListener('abuttondown', function (evt) {
       FlightControl.a();
     });

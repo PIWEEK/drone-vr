@@ -88,8 +88,15 @@ async function init() {
 
 const messageRecived = (data) => {
   console.log('mensaje = ', data);
+  if (photo) {
+    photoCount++;
+    fs.writeFile(`photo${photoCount}.jpg`, lastImg, function(err) {});
+    return Promise.resolve();
+  }
   return droneRun(data);
 }
+var lastImg;
+var photoCount = 0;
 
 async function videoByImage() {
   const connectedClients = [];
@@ -97,10 +104,11 @@ async function videoByImage() {
   var count = 0;
 
   const server = new zerorpc.Server({
-    sendFrame: function(name, reply) {
+    sendFrame: function(img, reply) {
       connectedClients.forEach((ws, i) => {
+        lastImg = img;
         if (ws.readyState === ws.OPEN) { // check if it is still connected
-          ws.send('data:image/jpg;base64,' + name.toString('base64')); // send
+          ws.send('data:image/jpg;base64,' + img.toString('base64')); // send
         } else { // if it's not connected remove from the array of connected ws
             connectedClients.splice(i, 1);
         }

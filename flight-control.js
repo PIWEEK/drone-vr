@@ -20,6 +20,9 @@ var FlightControl = {
   flip: (where) => {
     send(FlightControl.ws, `flip ${where}`);
   },
+  photo: () => {
+    send(FlightControl.ws, `photo`);
+  },
   axismove: (left, right) => {
     const horizontalLeft = left[0];
     const verticalLeft = left[1];
