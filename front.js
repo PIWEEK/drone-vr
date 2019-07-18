@@ -88,10 +88,13 @@ function updateStats(stats) {
 }
 
 AFRAME.registerComponent('video-component', {
+  init: function () {
+    // Set up the tick throttling.
+    // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
+  },
   tick: () => {
     if (lastFrame) {
       this.el.setAttribute('material', 'src', lastFrame);
-      this.el.setAttribute('material', '', );
       lastFrame = null;
     }
   }
@@ -263,5 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   el.setAttribute('width', width);
   el.setAttribute('height', height);
+
+  el.setAttribute('material', '', );
   // mainLoop();
 });
