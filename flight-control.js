@@ -1,16 +1,15 @@
-function send(command) {
+function send(ws, command) {
   console.log(command);
-  if (window['ws']) {
-    window['ws'].send(command);
-  }
+  ws.send(command);
 }
 
 var FlightControl = {
+  ws: null,
   x: () => {
-    send('takeoff');
+    send(FlightControl.ws, 'takeoff');
   },
   y: () => {
-    send('land');
+    send(FlightControl.ws, 'land');
   },
   axismove: (left, right) => {
     const horizontalLeft = left[0];
@@ -19,7 +18,7 @@ var FlightControl = {
     const horizontalRight = right[0];
     const verticalRight = right[1];
 
-    send(`rc ${horizontalRight} ${verticalRight} ${verticalLeft} ${horizontalLeft}`);
+    send(FlightControl.ws, `rc ${horizontalRight} ${verticalRight} ${verticalLeft} ${horizontalLeft}`);
 /*
 
     if (event.target.getAttribute('id') === 'left-control') {

@@ -4,7 +4,7 @@ const leftControllerSubject = new rxjs.Subject();
 const rightControllerSubject = new rxjs.Subject();
 
 function adjustSensibility([x, y]) {
-  let returnedX = -x;
+  let returnedX = x;
   let returnedY = -y;
   const sensibility = 0.15;
 
@@ -20,10 +20,10 @@ function adjustSensibility([x, y]) {
     returnedY = 0;
   }
 
-  returnedX = (returnedX * 100) / 2;
-  returnedY = (returnedY * 100) / 2;
+  returnedX = (returnedX * 100);
+  returnedY = (returnedY * 100);
 
-  return [returnedX, returnedY];
+  return [Math.round(returnedX), Math.round(returnedY)];
 }
 
 rxjs.combineLatest(
@@ -47,7 +47,9 @@ rxjs.combineLatest(
   })
 )
 .subscribe(([left, right]) => {
-  FlightControl.axismove(left, right);
+  if (FlightControl.ws) {
+    FlightControl.axismove(left, right);
+  }
 });
 
 const WS_URL = 'ws://10.8.1.137:3001';
@@ -59,6 +61,8 @@ ws.onopen = () => console.log(`Connected to ${WS_URL}`);
 ws.onmessage = (message) => {
   lastFrame = message.data;
 };
+
+FlightControl.ws = ws;
 
 var el;
 var leftHand;
