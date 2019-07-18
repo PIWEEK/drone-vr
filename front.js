@@ -130,10 +130,10 @@ AFRAME.registerComponent('vr-controls', {
 
         if (gripup.y > gripdown.y && gripup.y - gripdown.y > flipPreccision){
           diffHorizontal = gripup.y - gripdown.y;
-          actionHorizontal = 'back';
+          actionHorizontal = 'b';
         } else if (gripup.y < gripdown.y && gripdown.y - gripup.y > flipPreccision){
           diffHorizontal = gripdown.y - gripup.y;
-          actionHorizontal = 'forward';
+          actionHorizontal = 'f';
         }
 
         const horizontalUp = gripup.x * gripup.z;

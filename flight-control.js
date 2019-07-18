@@ -12,10 +12,10 @@ var FlightControl = {
     send(FlightControl.ws, 'land');
   },
   a: () => {
-    send(FlightControl.ws, 'flip left');
+    send(FlightControl.ws, 'flip l');
   },
   b: () => {
-    send(FlightControl.ws, 'flip right');
+    send(FlightControl.ws, 'flip r');
   },
   flip: (where) => {
     send(FlightControl.ws, `flip ${where}`);

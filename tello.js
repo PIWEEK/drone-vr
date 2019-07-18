@@ -2,6 +2,7 @@ const express = require('express');
 const dgram = require('dgram');
 const path = require('path');
 const WebSocket = require('ws');
+const fs = require('fs');
 const PORT = 8889;
 const HOST = '192.168.10.1';
 const drone = dgram.createSocket('udp4');
@@ -88,7 +89,7 @@ async function init() {
 
 const messageRecived = (data) => {
   console.log('mensaje = ', data);
-  if (photo) {
+  if (data === 'photo') {
     photoCount++;
     fs.writeFile(`photo${photoCount}.jpg`, lastImg, function(err) {});
     return Promise.resolve();
