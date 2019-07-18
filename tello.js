@@ -96,18 +96,24 @@ const messageRecived = (data) => {
 }
 var lastImg;
 var photoCount = 0;
+var statsInProgres = true;
 
 
 async function getStats(ws) {
-  const battery = await droneRun('battery?');
-  const tof = await droneRun('tof?');
-  const wifi = await droneRun('wifi?');
+  if (statsInProgres) {
+    statsInProgres = true;
 
-  ws.send(JSON.stringify({
-    battery: String(battery).replace('\r\n', ''),
-    tof: String(tof).replace('\r\n', ''),
-    wifi: String(wifi).replace('\r\n', '')
-  })); // send
+    const battery = await droneRun('battery?');
+    const tof = await droneRun('tof?');
+    const wifi = await droneRun('wifi?');
+
+    statsInProgres = false;
+    ws.send(JSON.stringify({
+      battery: String(battery).replace('\r\n', ''),
+      tof: String(tof).replace('\r\n', ''),
+      wifi: String(wifi).replace('\r\n', '')
+    })); // send
+  }
 }
 
 async function videoByImage() {
