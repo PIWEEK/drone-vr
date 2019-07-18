@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
   </head>
   <body>
-    <a-scene>
+    <a-scene background="color: black">
       <a-entity light="type: directional; color: #FFFFFF; intensity: 0.5" position="-0.01 0.590 0"></a-entity>
       <a-entity light="type: directional; color: #FFFFFF; intensity: 1" position="-0.13 -1 0"></a-entity>
       <a-entity light="type: directional; color: #FFFFFF; intensity: 1" position="-0.13 2 0"></a-entity>
@@ -24,7 +24,6 @@
         id="entity1"
         scale="0.710 0.570 0.960"
         position="0 1.160 -0.530"></a-plane>
-      <a-sky background="#000000"></a-sky>
       <a-entity id="left-control" vr-controls oculus-touch-controls="hand: left"></a-entity>
       <a-entity id="right-control" vr-controls oculus-touch-controls="hand: right"></a-entity>
 
