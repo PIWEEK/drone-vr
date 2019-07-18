@@ -87,6 +87,16 @@ function updateStats(stats) {
   signal.setAttribute('value', stats.wifi);
 }
 
+AFRAME.registerComponent('video-component', {
+  tick: () => {
+    if (lastFrame) {
+      this.el.setAttribute('material', 'src', lastFrame);
+      this.el.setAttribute('material', '', );
+      lastFrame = null;
+    }
+  }
+});
+
 AFRAME.registerComponent('vr-controls', {
   init: function () {
     var el = this.el;
@@ -253,5 +263,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   el.setAttribute('width', width);
   el.setAttribute('height', height);
-  mainLoop();
+  // mainLoop();
 });
