@@ -2,6 +2,7 @@ var FRAME = 'data:image/jpg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHB
 
 const leftControllerSubject = new rxjs.Subject();
 const rightControllerSubject = new rxjs.Subject();
+const flip = new rxjs.Subject();
 
 function adjustSensibility([x, y]) {
   let returnedX = x;
@@ -52,6 +53,10 @@ rxjs.combineLatest(
   }
 });
 
+flip.subscribe(() => {
+  console.log('flip');
+});
+
 const WS_URL = 'ws://10.8.1.137:3001';
 const ws = new WebSocket(WS_URL);
 var lastFrame;
@@ -67,6 +72,7 @@ FlightControl.ws = ws;
 var el;
 var leftHand;
 var rightHand;
+var gripdown;
 
 AFRAME.registerComponent('vr-controls', {
   init: function () {
@@ -77,6 +83,79 @@ AFRAME.registerComponent('vr-controls', {
 
     el.addEventListener('ybuttondown', function (evt) {
       FlightControl.y();
+    });
+
+    el.addEventListener('abuttondown', function (evt) {
+      FlightControl.a();
+    });
+
+    el.addEventListener('bbuttondown', function (evt) {
+      FlightControl.b();
+    });
+
+    el.addEventListener('gripdown', function (evt) {
+      if (evt.target.getAttribute('id') === 'left-control') {
+        gripdown = {
+          ...leftHand.getAttribute('position')
+        };
+      } else {
+        gripdown = {
+          ...rightHand.getAttribute('position')
+        };
+      }
+    });
+
+    el.addEventListener('gripup', function (evt) {
+      var gripup = null;
+      const flipPreccision = 0.12;
+
+      if (evt.target.getAttribute('id') === 'left-control') {
+        gripup = {
+          ...leftHand.getAttribute('position')
+        };
+      } else {
+        gripup = {
+          ...rightHand.getAttribute('position')
+        };
+      }
+      if (gripdown) {
+        var diffHorizontal = -Infinity;
+        var diffVertical = -Infinity;
+        var actionHorizontal;
+        var actionVertical;
+
+        if (gripup.y > gripdown.y && gripup.y - gripdown.y > flipPreccision){
+          diffHorizontal = gripup.y - gripdown.y;
+          actionHorizontal = 'back';
+        } else if (gripup.y < gripdown.y && gripdown.y - gripup.y > flipPreccision){
+          diffHorizontal = gripdown.y - gripup.y;
+          actionHorizontal = 'forward';
+        }
+
+        const horizontalUp = gripup.x * gripup.z;
+        const horizontalDown = gripdown.x * gripdown.z;
+/*
+        if (horizontalUp < horizontalDown && horizontalDown - horizontalUp > flipPreccision){
+          diffVertical = horizontalDown - horizontalUp;
+          actionVertical = 'left';
+          console.log('aa');
+        } else if (horizontalUp > horizontalDown && horizontalUp - horizontalDown > flipPreccision){
+          diffVertical = horizontalUp - horizontalDown;
+          actionVertical = 'right';
+          console.log('b');
+        }
+*/
+        if (actionVertical || actionHorizontal) {
+          if (diffVertical > diffHorizontal) {
+            FlightControl.flip(actionVertical);
+          } else {
+            FlightControl.flip(actionHorizontal);
+          }
+        }
+
+        gripdown = null;
+
+      }
     });
 
     el.addEventListener('axismove', function (evt) {
@@ -90,12 +169,53 @@ AFRAME.registerComponent('vr-controls', {
   }
 });
 
+/*
+var zLeftHistory = [];
+var zRightHistory = [];
+*/
+function getLastTime(time, list) {
+  return list.find((it) => {
+    return it.time > time - 500;
+  });
+}
+
 const mainLoop = function() {
   if (lastFrame) {
     el.setAttribute('material', 'src', lastFrame);
     el.setAttribute('material', '', );
     lastFrame = null;
   }
+
+  /*
+  if (zLeftHistory) {
+    const currentZ = leftHand.getAttribute('position').z;
+    const currentTime = new Date().getTime();
+
+    zLeftHistory.push({
+      time: currentTime,
+      z: currentZ
+    });
+
+    const oldPosition = getLastTime(currentTime, zLeftHistory);
+
+    if (currentZ && oldPosition) {
+      if (currentZ > oldPosition.z) {
+        let diff = currentZ - oldPosition.z;
+        // console.log(oldPosition.time, currentTime, diff);
+        // console.log(diff);
+        if (diff > 0.07) {
+          console.log('check')
+          zLeftHistory = [];
+        }
+      }
+    }
+
+    if (zLeftHistory.length === 400) {
+      zLeftHistory.shift();
+    }
+  }*/
+
+  //console.log(leftHand.getAttribute('position'));
 
   //console.log(leftHand.getAttribute('position'));
 

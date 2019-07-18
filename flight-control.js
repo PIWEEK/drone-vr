@@ -1,5 +1,5 @@
 function send(ws, command) {
-  console.log(command);
+  // console.log(command);
   ws.send(command);
 }
 
@@ -10,6 +10,15 @@ var FlightControl = {
   },
   y: () => {
     send(FlightControl.ws, 'land');
+  },
+  a: () => {
+    send(FlightControl.ws, 'flip left');
+  },
+  b: () => {
+    send(FlightControl.ws, 'flip right');
+  },
+  flip: (where) => {
+    send(FlightControl.ws, `flip ${where}`);
   },
   axismove: (left, right) => {
     const horizontalLeft = left[0];
