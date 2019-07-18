@@ -26,6 +26,7 @@ function spawnPython(exitCallback) {
 }
 
 let currentPromiseResolver = null;
+let actionInProgress = false;
 
 function sleep(ms){
   return new Promise((resolve) => {
@@ -41,6 +42,8 @@ function handleError(err)  {
 }
 
 function droneRun(command) {
+  console.log('droneRun-----------_>', command);
+  actionInProgress = true;
   drone.send(command, 0, command.length, PORT, HOST, handleError);
 
   return new Promise((resolve) => {
@@ -49,11 +52,12 @@ function droneRun(command) {
 }
 
 drone.on('message', (message) => {
-  if (String(message) !== 'ok') {
-    console.log(`drone : ${message}`);
-  }
+  console.log(`drone : ${message}`);
+  /* if (String(message) !== 'ok') {
+  } */
 
   if (String(message) === 'ok') {
+    actionInProgress = false;
     currentPromiseResolver();
   }
 });
@@ -73,12 +77,18 @@ async function flight () {
 
 async function init() {
   await droneRun('command');
+  await droneRun('speed 100');
   droneRun('battery?');
   await droneRun('streamon');
 
   spawnPython(() => {
     console.log('closing python spawn')
   });
+}
+
+const messageRecived = (data) => {
+  console.log('mensaje = ', data);
+  return droneRun(data);
 }
 
 async function videoByImage() {
@@ -109,15 +119,14 @@ async function videoByImage() {
     console.log('connection');
     connectedClients.push(ws);
 
-    ws.on('message', (data) => {
-      console.log('mensaje', data)
-      droneRun(data);
-    });
+    ws.on('message', messageRecived);
   });
 
   await init();
 
   // flight();
+  // flight2();
+  flight3();
 }
 
 videoByImage();
@@ -125,7 +134,65 @@ videoByImage();
 app.use(express.static('.'));
 app.listen(HTTP_PORT, () => console.log(`HTTP server listening at http://localhost:${HTTP_PORT}`));
 
-setTimeout(() => {
+// forward +
+// back -
+
+// up +
+// down -
+
+// left +
+// right -
+
+// a b c d
+
+// a left/right
+// b forward/backward
+// c up/down
+// d yaw
+
+async function flight3() {
+  await droneRun('takeoff');
+  droneRun('rc 0 20 20 0');
+
+  setTimeout(async () => {
+    droneRun('rc 0 -20 -20 0');
+
+    setTimeout(async () => {
+      await droneRun('land');
+    }, 8000);
+  }, 8000);
+}
+
+/* setTimeout(() => {
   console.log('force end');
   droneRun('land');
-}, 30000);
+}, 30000); */
+
+/* async function flight2 () {
+  console.log('klkkk111');
+  messageRecived('takeoff');
+  messageRecived('forward 10');
+  messageRecived('forward 10');
+  messageRecived('forward 10');
+  messageRecived('forward 10');
+
+  messageRecived('left 10');
+  messageRecived('left 10');
+  messageRecived('left 10');
+  messageRecived('left 10');
+
+  messageRecived('right 10');
+  messageRecived('right 10');
+  messageRecived('right 10');
+  messageRecived('right 10');
+
+  setTimeout(() => {
+    messageRecived('left 50');
+
+    setTimeout(() => {
+      droneRun('land');
+    }, 2000);
+  }, 8000)
+
+}
+ */

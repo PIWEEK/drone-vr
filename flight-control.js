@@ -11,31 +11,26 @@ var FlightControl = {
     send('land');
   },
   axismove: (event) => {
-    const distance = 10;
-    const horizontal = event.detail.axis[0];
-    const vertical = event.detail.axis[1];
+    const distance = 40;
+    const originalHorizontal = event.detail.axis[0];
+    const originalVertical = event.detail.axis[1];
+
+    const horizontal = (originalHorizontal * 100) / 2;
+    const vertical = (originalVertical * 100) / 2;
     const noMoveMargin = 0.5;
 
     if (event.target.getAttribute('id') === 'left-control') {
       if (horizontal > noMoveMargin) {
-        send(`cw 5`);
+        send(`cw 15`);
       } else if (horizontal < -noMoveMargin) {
-        send(`ccw 5`);
+        send(`ccw 15`);
       } else if (vertical < -noMoveMargin) {
         send(`up ${distance}`);
       } else if (vertical > noMoveMargin) {
         send(`down ${distance}`);
       }
     } else {
-      if (horizontal > noMoveMargin) {
-        send(`right ${distance}`);
-      } else if (horizontal < -noMoveMargin) {
-        send(`left ${distance}`);
-      } else if (vertical < -noMoveMargin) {
-        send(`forward ${distance}`);
-      } else if (vertical > noMoveMargin) {
-        send(`back ${distance}`);
-      }
+      send(`rc ${horizontal} ${vertical} 0 0`);
     }
 
    //  console.log(event.detail.axis);
