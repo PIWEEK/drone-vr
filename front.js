@@ -64,7 +64,11 @@ var lastFrame;
 ws.onopen = () => console.log(`Connected to ${WS_URL}`);
 
 ws.onmessage = (message) => {
-  lastFrame = message.data;
+  if (message.data.indexOf('data:image/jpg;base64') !== -1) {
+    lastFrame = message.data;
+  } else {
+    updateStats(JSON.parse(message.data));
+  }
 };
 
 FlightControl.ws = ws;
@@ -73,6 +77,16 @@ var el;
 var leftHand;
 var rightHand;
 var gripdown;
+var battery;
+var altitude;
+var signal;
+
+function updateStats(stats) {
+  console.log(stats);
+  battery.setAttribute('value', stats.battery);
+  altitude.setAttribute('value', stats.tof);
+  signal.setAttribute('value', stats.wifi);
+}
 
 AFRAME.registerComponent('vr-controls', {
   init: function () {
@@ -230,6 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
   el = document.querySelector('#entity1');
   leftHand = document.querySelector('#left-control');
   rightHand = document.querySelector('#right-control');
+
+  battery = document.querySelector('#battery-value');
+  altitude = document.querySelector('#altitude-value');
+  signal = document.querySelector('#signal-value');
+
   const width = 1; // meters
   const height = width * 760 / 960;
 

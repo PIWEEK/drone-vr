@@ -57,10 +57,9 @@ drone.on('message', (message) => {
   /* if (String(message) !== 'ok') {
   } */
 
-  if (String(message) === 'ok') {
-    actionInProgress = false;
-    currentPromiseResolver();
-  }
+  //if (String(message) === 'ok') {
+  actionInProgress = false;
+  currentPromiseResolver(message);
 });
 
 const zerorpc = require('zerorpc');
@@ -79,7 +78,6 @@ async function flight () {
 async function init() {
   await droneRun('command');
   await droneRun('speed 100');
-  droneRun('battery?');
   await droneRun('streamon');
 
   spawnPython(() => {
@@ -98,6 +96,19 @@ const messageRecived = (data) => {
 }
 var lastImg;
 var photoCount = 0;
+
+
+async function getStats(ws) {
+  const battery = await droneRun('battery?');
+  const tof = await droneRun('tof?');
+  const wifi = await droneRun('wifi?');
+
+  ws.send(JSON.stringify({
+    battery: String(battery).replace('\r\n', ''),
+    tof: String(tof).replace('\r\n', ''),
+    wifi: String(wifi).replace('\r\n', '')
+  })); // send
+}
 
 async function videoByImage() {
   const connectedClients = [];
@@ -127,6 +138,10 @@ async function videoByImage() {
   wsServer.on('connection', (ws) => {
     console.log('connection');
     connectedClients.push(ws);
+
+    setInterval(() => {
+      getStats(ws);
+    }, 3000);
 
     ws.on('message', messageRecived);
   });
