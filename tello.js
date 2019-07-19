@@ -10,8 +10,12 @@ const app = express();
 const spawn = require('child_process').spawn;
 const WS_PORT = 3001;
 const HTTP_PORT = 3000;
+const STATE_PORT = 8890;
 
 drone.bind(PORT);
+
+const droneState = dgram.createSocket('udp4');
+droneState.bind(STATE_PORT);
 
 function spawnPython(exitCallback) {
   const args = ['Tello_Video/api.py'];
@@ -62,6 +66,25 @@ drone.on('message', (message) => {
   currentPromiseResolver(message);
 });
 
+var stats = {};
+
+droneState.on('message', (message) => {
+  let state = message
+  .toString()
+  .replace('\r\n', '')
+  .split(';')
+  .reduce((obj, it) => {
+    const stat = it.split(':');
+
+    obj[stat[0]] = stat[1];
+
+    return obj;
+  }, {});
+
+
+  stats = state;
+});
+
 const zerorpc = require('zerorpc');
 
 async function flight () {
@@ -99,21 +122,11 @@ var photoCount = 0;
 var statsInProgres = true;
 
 
-async function getStats(ws) {
-  if (statsInProgres) {
-    statsInProgres = true;
-
-    const battery = await droneRun('battery?');
-    const tof = await droneRun('tof?');
-    const wifi = await droneRun('wifi?');
-
-    statsInProgres = false;
-    ws.send(JSON.stringify({
-      battery: String(battery).replace('\r\n', ''),
-      tof: String(tof).replace('\r\n', ''),
-      wifi: String(wifi).replace('\r\n', '')
-    })); // send
-  }
+function getStats(ws) {
+  ws.send(JSON.stringify({
+    battery: String(stats.bat).replace('\r\n', ''),
+    tof: String(stats.tof).replace('\r\n', ''),
+  })); // send
 }
 
 async function videoByImage() {
@@ -147,7 +160,7 @@ async function videoByImage() {
 
     setInterval(() => {
       getStats(ws);
-    }, 4000);
+    }, 300);
 
     ws.on('message', messageRecived);
   });

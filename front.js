@@ -84,7 +84,7 @@ var signal;
 function updateStats(stats) {
   battery.setAttribute('value', stats.battery);
   altitude.setAttribute('value', stats.tof);
-  signal.setAttribute('value', stats.wifi);
+  // signal.setAttribute('value', stats.wifi);
 }
 
 AFRAME.registerComponent('video-component', {
