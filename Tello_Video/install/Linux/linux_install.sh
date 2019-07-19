@@ -30,6 +30,7 @@ sudo apt-get install python-matplotlib -y
 sudo apt-get install libzmq3-dev -y
 sudo pip install opencv-python
 sudo pip install pyzmq
+sudo pip install --upgrade setuptools
 sudo pip install zerorpc
 sudo apt-get install python-imaging-tk
 
